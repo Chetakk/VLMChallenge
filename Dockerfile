@@ -1,0 +1,26 @@
+FROM nvidia/cuda:12.1-cudnn8-runtime-ubuntu22.04
+
+WORKDIR /app
+
+# Install Python and dependencies
+RUN apt-get update && apt-get install -y \
+    python3.10 \
+    python3-pip \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements
+COPY requirements.txt .
+
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY src/ ./src/
+COPY notebooks/ ./notebooks/
+
+# Expose API port
+EXPOSE 8000
+
+# Default command
+CMD ["python3", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
