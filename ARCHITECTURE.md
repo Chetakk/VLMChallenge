@@ -47,10 +47,10 @@
 | Criterion          | Qwen2.5-VL-2B | GPT-4V     | Llava-1.6-34B  | LLaVA-1.6-7B |
 | ------------------ | ------------- | ---------- | -------------- | ------------ |
 | Parameters         | 2.4B          | ~100B      | 34B            | 7B           |
-| T4 Fit (16GB)      | [YES] QLoRA      | [NO]         | [NO]             | [YES] LoRA      |
+| T4 Fit (16GB)      | [YES] QLoRA   | [NO]       | [NO]           | [YES] LoRA   |
 | Temporal Reasoning | ⭐⭐⭐⭐      | ⭐⭐⭐⭐⭐ | ⭐⭐⭐         | ⭐⭐⭐       |
 | Cost               | $0            | $$$$       | Free but large | Free         |
-| JSON Output        | [YES] Native     | [YES]         | [EXCELLENT]         | [GOOD]         |
+| JSON Output        | [YES] Native  | [YES]      | [EXCELLENT]    | [GOOD]       |
 | Speed (Inference)  | 0.5s/clip     | 5s/clip    | 3s/clip        | 1.5s/clip    |
 
 **Justification:** Qwen2.5-VL offers best balance of temporal understanding (critical for AA@1), parameter efficiency (Kaggle constraint), and inference speed.
@@ -87,12 +87,237 @@ frames_indices = np.linspace(0, total_frames-1, num_frames=8, dtype=int)
 
 ### Comparison
 
-| Strategy                  | Pros                | Cons                        | Used        |
-| ------------------------- | ------------------- | --------------------------- | ----------- |
+| Strategy                  | Pros                | Cons                        | Used           |
+| ------------------------- | ------------------- | --------------------------- | -------------- |
 | **Uniform**               | Fast, deterministic | May miss key moments        | [YES] Phase 1  |
-| **Motion-Adaptive**       | Captures key frames | Slower, non-deterministic   | Future      |
+| **Motion-Adaptive**       | Captures key frames | Slower, non-deterministi# Architecture Documentation: Temporal Warehouse Operation Understanding
+
+## Assignment Context
+
+**Goal:**\
+From short warehouse videos, the system needs to: 1. Classify the main
+operation\
+2. Predict when that operation happens in time (tIoU@0.5)\
+3. Predict what operation comes next (AA@1)
+
+**Constraint:**\
+Access to the OpenPack RGB videos is restricted. Because of this, the
+current setup relies on procedurally generated warehouse videos that
+follow a consistent sequence of actions (Box Setup → Inner Packing →
+Tape → Put Items).
+
+**Evaluation Metrics:**
+
+-   **OCA (Operation Classification Accuracy):** Top-1 accuracy for
+    `dominant_operation`
+-   **tIoU@0.5:** Percentage of clips where predicted temporal bounds
+    overlap with ground truth by at least 0.5
+-   **AA@1 (Anticipation Accuracy):** Top-1 accuracy for
+    `next_operation`\
+    This is the most important metric (40% weight), since it reflects
+    whether the model understands temporal progression.
+
+------------------------------------------------------------------------
+
+## 1. Model Selection: Qwen2.5-VL-2B-Instruct
+
+### Why this model?
+
+#### Temporal reasoning
+
+The task is not about single images. Each clip contains a sequence of
+frames, and the model needs to reason across them. Vision--language
+transformer models operate on multi-frame inputs, which makes them
+suitable for this setup. Attention across frames helps the model capture
+motion patterns and transitions between actions.
+
+#### Hardware constraints
+
+The model has about 2.4B parameters, which is small enough to run on a
+Kaggle T4 GPU (16GB VRAM) using 4-bit quantization. With LoRA
+fine-tuning, the additional memory overhead remains manageable.
+
+#### Structured output
+
+The Instruct variant is trained to follow instructions and generate
+structured responses. Since outputs must follow a JSON schema, this
+reduces formatting errors during inference.
+
+#### Practical integration
+
+The model works cleanly with Hugging Face Transformers and bitsandbytes
+quantization. It is known to run reliably on T4 GPUs.
+
+**Decision:**\
+This model is not the largest available, but it balances temporal
+reasoning, hardware limits, and stability.
+
+------------------------------------------------------------------------
+
+## 2. Frame Sampling Strategy (Why 8 Frames?)
+
+### Reasoning
+
+For each 5-second clip, 8 frames are sampled:
+
+-   Roughly 0.6 seconds per frame
+-   Keeps VRAM usage manageable
+-   Reduces redundancy while preserving transitions
+
+More frames increase memory usage without proportional gain. Fewer
+frames risk missing transitions important for next-operation prediction.
+
+### Implementation
+
+Uniform sampling across the clip:
+
+``` python
+frames_indices = np.linspace(0, total_frames - 1, num_frames=8, dtype=int)
+```
+
+This method is fast, reproducible, and sufficient for short warehouse
+clips.
+
+### Impact on metrics
+
+-   **OCA:** Mostly unaffected\
+-   **tIoU@0.5:** Slight sensitivity\
+-   **AA@1:** Most sensitive to frame diversity
+
+------------------------------------------------------------------------
+
+## System Overview
+
+### Data Pipeline (`src/data/`)
+
+-   **Annotation Parser:** Validates and structures annotation files\
+-   **Clip Builder:** Constructs clips and aligns annotations\
+-   **Frame Sampler:** Extracts frames at fixed intervals\
+-   **Shard Writer:** Stores processed data as WebDataset shards
+
+### Training Pipeline (`src/training/`)
+
+-   **Dataset:** PyTorch dataset implementation\
+-   **VRAM Math:** Estimates safe batch sizes\
+-   **Finetune Config:** Central configuration management
+
+### Evaluation (`src/evaluation/`)
+
+-   **Metrics:** Computes OCA, tIoU, AA@1\
+-   **Evaluator:** Runs validation and produces reports
+
+### API (`src/api/`)
+
+-   **Inference Module:** Loads model and runs predictions\
+-   **FastAPI App:** Provides endpoints
+
+------------------------------------------------------------------------
+
+## Data Flow
+
+Raw Data\
+→ Annotation Parsing\
+→ Clip Building\
+→ Frame Sampling\
+→ WebDataset Shards\
+→ Training\
+→ Evaluation\
+→ API Inference
+
+------------------------------------------------------------------------
+
+## Failure Analysis and Mitigation
+
+### Temporal boundary errors (tIoU)
+
+**Issue:** Predicted operation boundaries may drift.
+
+**Mitigation:** - Include frame index ranges in prompts\
+- Plan auxiliary supervision for boundary learning
+
+### Next-operation prediction errors (AA@1)
+
+**Issue:** Model may memorize fixed synthetic sequence.
+
+**Mitigation:** - Randomize synthetic sequences\
+- Add multi-step anticipation\
+- Include hard negatives
+
+### VRAM issues
+
+**Mitigation:** - 4-bit quantization\
+- Gradient checkpointing\
+- Conservative batch sizes
+
+### Synthetic-to-real transfer gap
+
+**Mitigation:** - Strong data augmentation\
+- Domain adaptation when RGB becomes available
+
+### JSON formatting errors
+
+**Mitigation:** - Schema in prompts\
+- Pydantic validation\
+- Fallback baseline
+
+### Inference latency
+
+**Mitigation:** - Model caching\
+- GPU decoding\
+- Batch inference support
+
+------------------------------------------------------------------------
+
+## Data Modality and Licensing Decision
+
+### RGB restriction
+
+RGB videos require additional approval. Work cannot pause waiting for
+this.
+
+### Keypoint rendering approach
+
+Instead of RGB, pose keypoints are rendered as 2D skeleton images.
+
+**Advantages:** - No licensing issues\
+- Motion preserved\
+- Smaller data size\
+- Deterministic rendering
+
+**Limitations:** - Loss of fine visual detail\
+- Slight drop in classification accuracy expected
+
+------------------------------------------------------------------------
+
+## Future RGB Fine-tuning
+
+Once RGB access is granted:
+
+-   Reuse the same pipeline\
+-   Fine-tune existing LoRA adapters\
+-   Expect moderate improvements in OCA and tIoU
+
+------------------------------------------------------------------------
+
+## Current Dataset Status
+
+-   100 synthetic 5-second videos\
+-   All operation classes covered\
+-   Clean but unrealistic visuals\
+-   OpenPack-compatible annotations
+
+------------------------------------------------------------------------
+
+## Summary
+
+This system is designed to work under strict time and data constraints.\
+Synthetic data enables development and evaluation without blocking on
+licensing.\
+The architecture remains flexible so higher-quality RGB data can be
+integrated later with minimal changes.
+c   | Future         |
 | **Entropy-Based Ranking** | Balances both       | Moderate complexity         | [YES] Phase 2+ |
-| **Every 1st Frame**       | Captures all        | VRAM explosion (125 frames) | [NO]          |
+| **Every 1st Frame**       | Captures all        | VRAM explosion (125 frames) | [NO]           |
 
 ### Practical Impact on Metrics
 
@@ -363,3 +588,92 @@ API Deployment
 - **Hours 24-36:** Buffer for retraining, refining, contingencies
 
 **Critical Path:** Phase 3 fine-tuning time → must start early to allow iteration.
+
+---
+
+## 4. Data Modalities & Licensing Decision
+
+### RGB Licensing Challenge
+
+**Issue:** OpenPack RGB video files require special license approval (request submitted, timeline uncertain).
+
+**Business Impact:** Cannot immediately train on RGB; delays fine-tuning if waiting for permission.
+
+### Solution: Keypoint Rendering (Approved by Recruiter)
+
+**Primary Approach:** Use pose keypoint modality (already available) rendered as synthetic images.
+
+**Implementation:**
+
+1. Extract human pose keypoints from OpenPack data (body joint coordinates)
+2. Render keypoints as consistent 2D skeleton visualizations (frame-by-frame)
+3. Train Qwen2.5-VL on keypoint-rendered images instead of RGB frames
+4. Preserve temporal reasoning and next-operation prediction capability
+
+**Advantages:**
+
+- ✅ No licensing delays
+- ✅ Retains temporal cues (joint motion is clear from keypoint sequences)
+- ✅ Action dynamics preserved (operations visible through pose changes)
+- ✅ Reduced data size (single float array → rendered 336×336 image)
+- ✅ Reproducible: same keypoints → same rendered output
+
+**Limitations:**
+
+- ⚠️ Missing fine visual details (thread, tape, box material appearance)
+- ⚠️ Expected absolute accuracy drop 5-15% vs RGB, but temporal metrics less affected
+- ⚠️ OCA may suffer; AA@1 (next-operation) less impacted (pose-driven)
+
+### Fallback: Mock Data (If Keypoint Rendering Risks Deadline)
+
+**Contingency Plan (also approved):** If keypoint rendering implementation threatens 36-hour deadline:
+
+1. Download 10-20 short clips of warehouse packing from public sources (YouTube, etc.)
+2. Create minimal dummy JSON annotation file covering all 10 OpenPack operation classes
+3. Run full pipeline (Phase 1-4) end-to-end with mock data
+4. Validate all components work; results.json generated
+
+**Trade-off:** Model performance will be poor (untrained on real operations) but pipeline proven functional.
+
+### Data Strategy Timeline
+
+| Timeline       | Event                   | Action                                             |
+| -------------- | ----------------------- | -------------------------------------------------- |
+| **Now**        | RGB license pending     | Proceed with keypoint approach                     |
+| **Hour 0-4**   | Phase 1-2 complete      | Validate API + data loading                        |
+| **Hour 4-14**  | Phase 3 Kaggle training | Train on keypoint-rendered images                  |
+| **Hour 14-24** | Phase 4-5 evaluation    | Generate results.json                              |
+| **Later**      | RGB license approved    | Re-run fine-tuning with RGB data (LoRA compatible) |
+
+### Re-training with RGB (When Permission Granted)
+
+**Advantages of Phased Approach:**
+
+- ✅ All pipeline code is modality-agnostic (accepts any 336×336 images)
+- ✅ LoRA checkpoint can be fine-tuned again with RGB (transfer learning)
+- ✅ Keypoint-trained baseline provides performance floor
+- ✅ Minimal effort to swap data source and re-run `evaluate.py`
+
+**Expected Improvement with RGB:**
+
+- OCA: +5-15% (more fine visual distinctions)
+- tIoU@0.5: +2-5% (clearer operation boundaries)
+- AA@1: +3-8% (context awareness improves)
+
+### Synthetic Data Status (Current)
+
+**Background:** Initial real-video search of OpenPack did not yield examples of all 10 operation classes → synthesized procedurally consistent warehouse videos.
+
+**Current Dataset:**
+
+- ✅ 100 synthetic videos (5-second clips, 25fps)
+- ✅ Covers all 10 operation classes
+- ✅ Consistent lighting, pose, background (unrealistic but complete)
+- ✅ Annotations in OpenPack-compatible JSON schema
+- ⚠️ **All videos are synthetic** (domain gap vs real warehouse)
+
+**Post-Permission Plan:**
+
+- Maintain synthetic dataset as fallback
+- Augment with real OpenPack RGB clips once approved
+- Run multi-source fine-tuning (mixed synthetic + RGB batches)

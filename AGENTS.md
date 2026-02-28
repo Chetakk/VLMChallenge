@@ -142,14 +142,59 @@ This document describes the autonomous agents and automated components used in t
    [DONE] Model Selection Defense (Qwen2.5-VL vs alternatives)
    [DONE] Frame Sampling Rationale (why 8 frames)
    [DONE] Failure Analysis (6 failure modes + mitigations)
+   [DONE] Data Modalities & Licensing Decision (RGB delay → keypoint approach)
 
 2. **AGENTS.md:**
    [DONE] AI agent usage timeline (this document)
    [DONE] Generated code line counts
    [DONE] Time savings analysis
    [DONE] Future agent extensions
+   [DONE] Licensing workaround summary
 
 **Time Budget:** 2 hours
+
+---
+
+### Licensing Workaround & Data Strategy (Milestone 5 Addition)
+
+**Context:** Recruiter conversation (March 1, 2026)
+
+- **Chetak:** RGB data requires special license approval; should we use keypoints instead?
+- **Recruiter (Pugazh):** Yes, approved. Alternatively, use mock/stock data if keypoint rendering risks deadline.
+
+**Implementation Actions:**
+
+1. **Primary Approach: Keypoint Rendering**
+   - Extract pose keypoints (already available in OpenPack)
+   - Render keypoints as synthetic skeleton images (336×336)
+   - Train Qwen2.5-VL on keypoint-rendered frames
+   - Preserves temporal reasoning + next-operation prediction
+   - Expected 5-15% accuracy drop vs RGB, but temporal metrics less impacted
+
+2. **Fallback: Mock Data (if keypoint rendering is time-consuming)**
+   - Download 10-20 public warehouse packing clips
+   - Create dummy JSON annotations covering all 10 OpenPack classes
+   - Run full Phase 1-4 pipeline end-to-end
+   - Pipeline validated; model performance poor but functional
+
+3. **Re-training with RGB (Once Permission Granted)**
+   - All code is modality-agnostic (accepts any 336×336 images)
+   - LoRA checkpoint can be fine-tuned again on RGB (transfer learning)
+   - Single `evaluate.py` re-run generates updated results.json
+   - Minimal engineering effort; automatic improvement on RGB
+
+**Current Dataset Status:**
+
+- Synthetic data: 100 videos covering all 10 classes (procedurally generated)
+- Real RGB access: Pending license approval
+- Strategy: Use keypoint rendering now; add RGB fine-tuning later when permission arrives
+
+**Risk Mitigation:**
+
+- ✅ Pipeline is phase-independent: swap data source anytime
+- ✅ Keypoint baseline provides performance floor for comparison
+- ✅ No architectural changes needed for RGB transition
+- ✅ Deadline not at risk (keypoint rendering << 2 hours of Phase 5)
 
 ---
 
@@ -400,9 +445,9 @@ best_config = agent.search()  # Trains 9 configurations
 
 ## Deployment Checklist
 
-- [DONE] Phase 1: Run `test_phase1.py` 
-- [DONE] Phase 2: Run `python generate_synthetic_data.py` 
-- [DONE] Phase 2: Run `python create_training_samples.py` 
+- [DONE] Phase 1: Run `test_phase1.py`
+- [DONE] Phase 2: Run `python generate_synthetic_data.py`
+- [DONE] Phase 2: Run `python create_training_samples.py`
 - [ ] Phase 3: Upload `notebooks/qwen_training.ipynb` to Kaggle
 - [ ] Phase 3: Run Kaggle notebook (8-10 hours)
 - [ ] Phase 4: Download fine-tuned checkpoint

@@ -3,6 +3,7 @@
 ## Quick Start
 
 ### Prerequisites
+
 - Docker & Docker Compose installed
 - NVIDIA Docker runtime (for GPU support)
 - NVIDIA GPU with CUDA 12.1 support
@@ -20,7 +21,7 @@ docker-compose build
 ### Run with Docker Compose
 
 ```bash
-# Start the API service  
+# Start the API service
 docker-compose up -d
 
 # View logs
@@ -55,6 +56,7 @@ curl -X POST -F "file=@your_video.mp4" http://localhost:8000/predict
 ### Volumes & Mounting
 
 The docker-compose.yml mounts:
+
 - `./data` → `/app/data` - Synthetic video data
 - `./checkpoints` → `/app/checkpoints` - LoRA fine-tuned models
 - `./training_data_samples` → `/app/training_data_samples` - Training samples
@@ -86,6 +88,7 @@ docker run --rm \
 ### Troubleshooting
 
 **GPU not detected:**
+
 ```bash
 # Check NVIDIA GPU status
 docker run --rm --gpus all nvidia/cuda:12.1-base nvidia-smi
@@ -95,11 +98,13 @@ docker ps --no-trunc | grep nvidia
 ```
 
 **Model loading fails:**
+
 - Ensure checkpoints are in `/checkpoints` directory
 - Check HuggingFace model is accessible or cached
 - Monitor memory: `nvidia-smi` inside container
 
 **Port already in use:**
+
 ```bash
 # Change port in docker-compose.yml or
 docker-compose up -e PORT=8001 vlm-api
@@ -108,6 +113,7 @@ docker-compose up -e PORT=8001 vlm-api
 ### Production Deployment
 
 For production, modify Dockerfile:
+
 1. Remove `--reload` flag from CMD
 2. Add proper logging configuration
 3. Use `gunicorn` with multiple workers:
@@ -126,6 +132,6 @@ docker stats vlm-api
 # View logs in real-time
 docker-compose logs -f vlm-api --tail 50
 
-# Check health status  
+# Check health status
 docker-compose ps
 ```

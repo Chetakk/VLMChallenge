@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.1-cudnn8-runtime-ubuntu22.04
+FROM ubuntu:22.04
 
 WORKDIR /app
 
@@ -13,12 +13,15 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Update pip
+RUN python3 -m pip install --upgrade pip
+
 # Copy requirements
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir \
+RUN python3 -m pip install --no-cache-dir -r requirements.txt && \
+    python3 -m pip install --no-cache-dir \
     uvicorn[standard] \
     peft \
     bitsandbytes \
@@ -26,9 +29,9 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 
 # Copy application code
 COPY src/ ./src/
-COPY notebooks/ ./notebooks/
-COPY data/ ./data/
-COPY checkpoints/ ./checkpoints/
+
+# Create directories for data and checkpoints (will be mounted via volumes)
+RUN mkdir -p /app/data /app/checkpoints /app/training_data_samples
 
 # Expose port
 EXPOSE 8000
