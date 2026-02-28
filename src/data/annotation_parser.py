@@ -3,7 +3,7 @@ from typing import List, Dict
 import pandas as pd
 
 
-def load(csv_path: str) -> List[Dict]:
+def load_operations(csv_path: str) -> List[Dict]:
     csv_path = Path(csv_path)
     df = pd.read_csv(csv_path)
 
@@ -29,6 +29,9 @@ def load(csv_path: str) -> List[Dict]:
         )
 
     return operation
+
+
+    # for testing
 
 # if __name__ == "__main__":
 #     ops = load(
