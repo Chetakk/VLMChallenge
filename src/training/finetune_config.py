@@ -1,4 +1,3 @@
-# Fine-tuning configuration for QLoRA training
 
 from dataclasses import dataclass, field
 from typing import Optional, List
@@ -23,13 +22,13 @@ class FinetuneConfig:
     
     # Model settings
     model_name: str = "Qwen/Qwen2.5-VL-2B-Instruct"
-    model_precision: str = "4bit"  # 4bit quantization for QLoRA
+    model_precision: str = "4bit" 
     
     # Training settings
     learning_rate: float = 2e-4
     num_epochs: int = 3
-    batch_size: int = 2  # Per GPU batch size for T4
-    gradient_accumulation_steps: int = 16  # Simulate larger batches
+    batch_size: int = 2 
+    gradient_accumulation_steps: int = 16 
     warmup_steps: int = 500
     
     # Data settings
@@ -54,7 +53,7 @@ class FinetuneConfig:
     eval_steps: int = 500
     save_total_limit: int = 3
     
-    # Hardware/inference settings
+    # Hardware  settings
     device_map: str = "auto"
     gpu_count: int = 1
     num_workers: int = 2
