@@ -5,6 +5,7 @@
 ### Prerequisites
 
 - Docker & Docker Compose installed
+- **8–12 GB RAM allocated to Docker** (Settings → Resources) — required for build
 - NVIDIA Docker runtime (for GPU support)
 - NVIDIA GPU with CUDA 12.1 support
 
@@ -86,6 +87,14 @@ docker run --rm \
 ```
 
 ### Troubleshooting
+
+**Build fails with "Bus error (core dumped)" or "rpc error: EOF":**
+
+This is a memory exhaustion issue during `pip install`. Fixes:
+
+1. **Increase Docker memory:** Docker Desktop → Settings → Resources → Memory → set to **8–12 GB**
+2. The Dockerfile uses staged pip installs with `--prefer-binary` to reduce peak memory
+3. Close other apps to free RAM before building
 
 **GPU not detected:**
 
