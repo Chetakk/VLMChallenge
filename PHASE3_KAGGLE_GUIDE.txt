@@ -1,0 +1,290 @@
+"""
+PHASE 3: KAGGLE DEPLOYMENT GUIDE
+
+This guide walks through fine-tuning Qwen2.5-VL on Kaggle T4 GPUs.
+"""
+
+PHASE_3_DEPLOYMENT = """
+# Phase 3: Fine-tuning Qwen2.5-VL on Kaggle
+
+## Pre-Kaggle Checklist ✅
+
+COMPLETED:
+  ✅ Phase 1: Base API deployed locally (test_phase1.py passes)
+  ✅ Phase 2: 100 synthetic videos generated + 20 training samples
+  ✅ Phase 5: ARCHITECTURE.md with model justification + failure analysis
+  ✅ Phase 5: AGENTS.md with AI agent timeline
+
+READY FOR KAGGLE:
+  ✅ training_data_samples/ folder (20 videos + index.json)
+  ✅ src/training/ (dataset.py, vram_math.py, finetune_config.py)
+  ✅ notebooks/qwen_training.ipynb (ready to upload)
+  ✅ requirements.txt (transformers, peft, bitsandbytes)
+
+---
+
+## Step 1: Create Kaggle Notebook (5 minutes)
+
+1. Go to https://www.kaggle.com/code
+2. Click "+ New Notebook"
+3. Name: "VLM-Warehouse-Operations-Qwen25-LoRA"
+4. Language: Python
+5. GPU: T4 (search for "T4" in GPU dropdown)
+6. Create notebook
+
+---
+
+## Step 2: Upload Training Data (10 minutes)
+
+### Option A: Via Web UI (Recommended)
+
+1. In Kaggle notebook, go to **"Input"** tab
+2. Click **"Add Input"** → **"Dataset"** → **"New Dataset"**
+3. Upload from Computer:
+   - Select `training_data_samples/` folder
+   - Dataset Name: `vlm-warehouse-training-data`
+   - Create dataset
+4. Wait for upload (should be <1 minute for 20 videos)
+5. Attach dataset to notebook (via Input panel)
+
+### Option B: Via Kaggle CLI
+
+```bash
+# Install Kaggle CLI
+pip install kaggle
+
+# Create dataset
+kaggle datasets create -p training_data_samples \\
+  --public \\
+  --dir-mode zip
+
+# Get dataset name from output
+# Use in notebook: /kaggle/input/vlm-warehouse-training-data/
+```
+
+---
+
+## Step 3: Upload & Run Notebook (10 minutes)
+
+1. Copy entire `notebooks/qwen_training.ipynb` content
+2. In Kaggle notebook cell:
+   - Delete any existing cells
+   - Paste all cells from qwen_training.ipynb
+3. Click **"Run All"**
+4. Monitor output (should see):
+   ```
+   PyTorch version: 2.0.1
+   CUDA available: True
+   GPU count: 1
+   GPU 0: Tesla T4 (15.7GB)
+   ```
+
+---
+
+## Step 4: Training Execution (8-10 hours, hands-off)
+
+**Timeline:**
+- Cell 1-4: Setup (2 min) - pip install, imports, VRAM check
+- Cell 5-6: Model loading (3-5 min) - Qwen2.5-VL quantization
+- Cell 7: LoRA setup (1 min)
+- Cell 8-10: Data loading (2 min)
+- Cell 11: Training (8-10 hours) - Main fine-tuning loop
+
+**Expected Output Every 50 Steps:**
+```
+[TRAINING] Step 50/500: loss=2.134, learning_rate=1.8e-4
+[TRAINING] Step 100/500: loss=1.892
+...
+[TRAINING] Step 500/500: loss=1.234
+[CHECKPOINTS] Saved: outputs/qwen-lora/checkpoint-1000
+```
+
+**DO NOT CLOSE KAGGLE PAGE DURING TRAINING** - Notebook will save hourly checkpoints to `/kaggle/working/outputs/qwen-lora/`
+
+---
+
+## Step 5: Download Fine-tuned Checkpoint (5 minutes)
+
+After training completes:
+
+```python
+# Add cell at end of notebook:
+import tarfile
+import os
+
+output_dir = "/kaggle/working/outputs/qwen-lora/"
+
+# Create tarball
+with tarfile.open("/kaggle/working/checkpoint.tar.gz", "w:gz") as tar:
+    tar.add(output_dir, arcname="qwen-lora-checkpoint")
+
+# Download from Kaggle Output panel
+# File: /kaggle/working/checkpoint.tar.gz
+```
+
+Then:
+1. Go to notebook **"Output"** tab
+2. Download `checkpoint.tar.gz` (~500MB)
+3. Extract locally: `tar -xzf checkpoint.tar.gz`
+4. Move to `checkpoints/qwen-lora/`
+
+---
+
+## Step 6: Update Local Inference (5 minutes)
+
+Update `src/api/inference.py`:
+
+```python
+class Qwen25VLInference:
+    def __init__(self, model_name=None, use_lora=True, lora_path=None):
+        self.model_name = model_name or "Qwen/Qwen2.5-VL-2B-Instruct"
+        self.use_lora = use_lora
+        self.lora_path = lora_path or "checkpoints/qwen-lora"  # ← UPDATE PATH
+        self.model = None
+```
+
+---
+
+## Step 7: Test Fine-tuned Model (10 minutes)
+
+```bash
+# Test locally with fine-tuned model
+python -m uvicorn src.api.main:app --reload
+
+# In another terminal:
+curl -X POST -F "file=@test_video.mp4" http://localhost:8000/predict
+
+# Should see JSON response with improved AA@1 predictions
+```
+
+---
+
+## Step 8: Run Phase 4 Evaluation (2 minutes)
+
+```bash
+python evaluate.py
+```
+
+Expected output:
+```
+Baseline (synthetic):  OCA=1.0, tIoU@0.5=1.0, AA@1=1.0 (100% perfect)
+Fine-tuned (if real data): OCA=0.XX, tIoU@0.5=0.XX, AA@1=0.XX
+```
+
+Generate `results.json` with final metrics.
+
+---
+
+## Troubleshooting
+
+### Issue: CUDA Out of Memory (OOM)
+**Symptom:** Training crashes with "CUDA out of memory"
+
+**Solutions:**
+1. Reduce batch_size: 2 → 1
+2. Increase gradient_accumulation_steps: 16 → 32
+3. Enable gradient_checkpointing: True
+4. Use 8-bit quantization instead of 4-bit
+
+### Issue: Training Very Slow (<30 samples/min)
+**Symptom:** Each training step takes >2 seconds
+
+**Solutions:**
+1. Check GPU utilization: `nvidia-smi` in notebook cell
+2. If <50% utilization: Increase batch_size
+3. Enable mixed precision (fp16=True)
+4. Disable validation loop
+
+### Issue: JSON Parse Errors in Inference
+**Symptom:** API returns fallback BaselineModel predictions
+
+**Solutions:**
+1. Fine-tuned model not properly loaded (check LoRA path)
+2. Frame preprocessing issue (try with different video)
+3. Model needs more fine-tuning iterations (try 5 epochs instead of 3)
+
+### Issue: "Module not found" in Kaggle
+**Symptom:** `ImportError: No module named 'peft'`
+
+**Solutions:**
+1. Ensure pip install runs first: `!pip install -q peft bitsandbytes`
+2. Restart kernel: Kernel → Restart
+3. Check Kaggle has correct Python version (3.9+)
+
+---
+
+## Expected Fine-tuning Results
+
+**Baseline (Zero-shot Qwen2.5-VL on Synthetic Data):**
+- OCA: ~0.75
+- tIoU@0.5: ~0.65
+- AA@1: ~0.60
+
+**After LoRA Fine-tuning (3 epochs, synthetic data):**
+- OCA: 0.80-0.85 (+5-10%)
+- tIoU@0.5: 0.75-0.80 (+10-15%)
+- AA@1: 0.70-0.75 (+10-15%)
+
+**Note:** These are estimates assuming no real OpenPack data. Actual improvement depends on:
+1. Synthetic data quality
+2. Number of fine-tuning epochs
+3. LoRA rank and alpha parameters
+4. Domain gap (synthetic vs real operations)
+
+---
+
+## Time Management
+
+**36-hour deadline allocation:**
+- Phase 1-2: 4 hours ✅ DONE
+- Phase 3 (Kaggle): 10 hours (8-10 training + 1 download + 1 local test)
+- Phase 4 (Evaluation): 2 hours
+- Phase 5 (Documentation): 2 hours
+- **Buffer: 18 hours** for retraining, debugging, paper writing
+
+**Critical:** Start Phase 3 ASAP. Training time is wall-clock, cannot parallelize.
+
+---
+
+## Final Deliverables (Phase 5)
+
+Ensure repository has:
+- ✅ README.md (project overview)
+- ✅ ARCHITECTURE.md (model justification + failure analysis)
+- ✅ AGENTS.md (AI agent timeline)
+- ✅ requirements.txt (all dependencies)
+- ✅ src/api/ (FastAPI server)
+- ✅ src/training/ (fine-tuning code)
+- ✅ src/evaluation/ (metrics computation)
+- ✅ src/data/ (data pipeline)
+- ✅ notebooks/qwen_training.ipynb (Kaggle notebook)
+- ✅ results.json (final metrics)
+- 📂 checkpoints/ (LoRA fine-tuned model)
+- 📂 data/synthetic/ (100 synthetic videos + annotations)
+
+---
+
+## Success Criteria
+
+**Phase 3 Success = :**
+- ✅ Training completes without OOM error
+- ✅ Loss decreases monotonically over epochs
+- ✅ Checkpoint saved properly
+- ✅ Fine-tuned model loads locally without error
+- ✅ Inference API returns valid JSON predictions
+
+**Overall Success = :**
+- ✅ All 5 phases executed sequentially
+- ✅ OCA + tIoU@0.5 + AA@1 computed and saved to results.json
+- ✅ ARCHITECTURE.md + AGENTS.md complete
+- ✅ Code pushed to GitHub
+- ✅ README explains workarounds and decisions
+- ✅ All dependencies pinned in requirements.txt
+
+---
+
+Good luck! Start Kaggle training now. 🚀
+"""
+
+if __name__ == "__main__":
+    print(PHASE_3_DEPLOYMENT)

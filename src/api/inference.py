@@ -1,33 +1,32 @@
 """
-Inference Module
+PHASE 1: Base VLM Inference Module
 
-Qwen2.5-VL model inference for temporal operation predictions.
+Zero-shot and fine-tuned Qwen2.5-VL inference for temporal warehouse operations.
 """
 
 import torch
+import numpy as np
 from pathlib import Path
 from typing import Dict, List, Optional
-import json
+from PIL import Image
 
 
-class QwenVLInference:
+class Qwen25VLInference:
     """Qwen2.5-VL inference engine."""
 
-    def __init__(self, model_path: str = "Qwen/Qwen2.5-VL-2B-Instruct", 
-                 device: str = "cuda", use_lora: bool = False):
-        """
-        Initialize inference engine.
-        
-        Args:
-            model_path: Path to model or HF model ID
-            device: Device to load model on ("cuda" or "cpu")
-            use_lora: Whether to use LoRA-adapted model
-        """
-        self.model_path = model_path
+    def __init__(self, 
+                 model_name: str = "Qwen/Qwen2.5-VL-2B-Instruct", 
+                 device: str = "auto", 
+                 use_lora: bool = False,
+                 lora_path: Optional[str] = None):
+        """Initialize Qwen2.5-VL inference engine."""
+        self.model_name = model_name
         self.device = device
         self.use_lora = use_lora
+        self.lora_path = lora_path
         self.model = None
         self.processor = None
+        self._is_loaded = False
 
     def load_model(self):
         """Load Qwen2.5-VL model from disk or HuggingFace."""
@@ -170,45 +169,29 @@ class QwenVLInference:
 
 class BaselineModel:
     """
-    Baseline model for zero-shot inference (no fine-tuning).
-    Uses rules based on temporal patterns.
+    PHASE 1 Baseline: Rule-based predictions (no ML).
+    Used to establish zero-shot performance floor.
     """
     
     OPERATION_SEQUENCE = [
-        "Box Setup",
-        "Inner Packing",
-        "Tape",
-        "Put Items",
-        "Pack",
-        "Wrap",
-        "Label",
-        "Final Check",
+        "Box Setup", "Inner Packing", "Tape", "Put Items",
+        "Pack", "Wrap", "Label", "Final Check",
     ]
     
-    def predict(self, clip_id: str, num_frames: int = 125) -> Dict:
-        """
-        Predict operations using rule-based approach.
-        
-        Args:
-            clip_id: Clip identifier
-            num_frames: Total number of frames in clip
-        
-        Returns:
-            dict with predictions
-        """
-        # Assume operations are uniformly distributed
+    def predict(self, clip_id: str = "", num_frames: int = 125) -> Dict:
+        """Baseline rule-based prediction."""
         frame_per_op = num_frames // len(self.OPERATION_SEQUENCE)
-        
-        # Middle operation (for 5-second clip, usually 2nd-3rd operation)
-        mid_idx = len(self.OPERATION_SEQUENCE) // 2
+        mid_idx = len(self.OPERATION_SEQUENCE) //2
         
         return {
             "clip_id": clip_id,
             "dominant_operation": self.OPERATION_SEQUENCE[mid_idx],
             "temporal_segment": {
-                "start_frame": (mid_idx) * frame_per_op,
+                "start_frame": mid_idx * frame_per_op,
                 "end_frame": (mid_idx + 1) * frame_per_op,
             },
             "anticipated_next_operation": self.OPERATION_SEQUENCE[min(mid_idx + 1, len(self.OPERATION_SEQUENCE) - 1)],
+            "confidence": 0.33,
         }
+
 

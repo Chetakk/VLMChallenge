@@ -1,0 +1,197 @@
+{
+  "timestamp": "C:\\Users\\Chetak\\Documents\\GitHub\\projects\\VLM Challenge\\VLMChallengeCode\\results.json",
+  "metrics": {
+    "total_samples": 30,
+    "OCA": 1.0,
+    "tIoU@0.5": 1.0,
+    "AA@1": 1.0,
+    "mean_tIoU": 1.0,
+    "median_tIoU": 1.0,
+    "OCA_count": 30,
+    "tIoU@0.5_count": 30,
+    "AA@1_count": 30
+  },
+  "test_size": 30,
+  "predictions": [
+    {
+      "clip_id": "U_SYNTH_02_S_0020_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_02_S_0021_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_02_S_0022_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_02_S_0023_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_02_S_0024_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0000_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0001_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0002_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0003_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0004_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0005_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0006_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0007_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0008_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0009_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0010_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0011_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0012_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0013_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0014_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0015_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0016_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0017_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0018_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0019_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0020_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0021_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0022_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0023_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    },
+    {
+      "clip_id": "U_SYNTH_03_S_0024_t0000",
+      "predicted_operation": "Inner Packing",
+      "predicted_next_operation": "Tape",
+      "predicted_tIoU": 1.0
+    }
+  ]
+}

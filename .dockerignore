@@ -1,0 +1,50 @@
+# Data directories - not needed in container
+data/
+training_data_samples/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+
+# Jupyter notebooks
+*.ipynb
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE and OS files
+.vscode/
+.idea/
+.git/
+.gitignore
+.DS_Store
+Thumbs.db
+
+# Large media files
+*.mp4
+*.avi
+*.mov
+
+# Local development
+.env
+.env.local
+*.log
+
+# Model checkpoints (download in container if needed)
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+
+# Documentation (optional, keep if desired)
+*.md
