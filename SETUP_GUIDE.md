@@ -1,38 +1,38 @@
 # VLM Challenge - Setup & Execution Guide
 
-## 📋 What's Been Generated
+## What's Been Generated
 
 I've created a **complete end-to-end pipeline** for Qwen2.5-VL fine-tuning on Kaggle T4 with synthetic data.
 
 ### Generated Files:
 
-✅ **Data Generation**
+[OK] **Data Generation**
 
 - `generate_synthetic_data.py` - Creates 100 synthetic warehouse videos (5sec each)
 
-✅ **Core Pipeline**
+[OK] **Core Pipeline**
 
 - `src/training/dataset.py` - PyTorch Dataset loader (complete)
 - `src/training/vram_math.py` - VRAM optimization calculations
 - `src/training/finetune_config.py` - Configuration management
 
-✅ **Inference & API**
+[OK] **Inference & API**
 
 - `src/api/inference.py` - Qwen2.5-VL model loading & prediction
 - `src/api/main.py` - FastAPI endpoints (complete)
 
-✅ **Training Notebook**
+[OK] **Training Notebook**
 
 - `notebooks/qwen_training.ipynb` - Kaggle notebook ready to run
 
-✅ **Deployment**
+[OK] **Deployment**
 
 - `Dockerfile` (updated) - Container image with CUDA 12.1
 - `docker-compose.yml` - Multi-service orchestration
 
 ---
 
-## 🎯 Execution Plan (Step by Step)
+## Execution Plan (Step by Step)
 
 ### STEP 1: Generate Synthetic Data (5 min)
 
@@ -51,12 +51,12 @@ python generate_synthetic_data.py
 **What to expect:**
 
 ```
-🎬 Generating synthetic warehouse videos...
-📁 Output directory: data/synthetic
-🎥 Creating 100 clips (5s @ 25fps each)
-✅ Created 10/100 clips
+[INFO] Generating synthetic warehouse videos...
+[INFO] Output directory: data/synthetic
+[INFO] Creating 100 clips (5s @ 25fps each)
+[PROGRESS] Created 10/100 clips
 ...
-🎉 Synthetic data generation complete!
+[DONE] Synthetic data generation complete!
 ```
 
 ---
@@ -164,7 +164,7 @@ curl -X POST "http://localhost:8000/predict" \
 
 ---
 
-## 📊 Expected Performance
+## Expected Performance
 
 ### Baseline (Zero-shot):
 
@@ -182,7 +182,7 @@ curl -X POST "http://localhost:8000/predict" \
 
 ---
 
-## 💾 Resource Requirements
+## Resource Requirements
 
 | Step              | Time   | VRAM | Notes                 |
 | ----------------- | ------ | ---- | --------------------- |
@@ -196,7 +196,7 @@ curl -X POST "http://localhost:8000/predict" \
 
 ---
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 ### Issue: OOM Error in Kaggle
 
@@ -222,7 +222,7 @@ Qwen2_5VLForConditionalGeneration.from_pretrained("Qwen/Qwen2.5-VL-2B-Instruct")
 
 ---
 
-## 📁 Final Project Structure
+## Final Project Structure
 
 ```
 VLMChallengeCode/
@@ -253,7 +253,7 @@ VLMChallengeCode/
 
 ---
 
-## ✅ Checklist to Complete
+## Checklist to Complete
 
 - [ ] Run `python generate_synthetic_data.py`
 - [ ] Run `python -m src.test_pipeline`
@@ -268,7 +268,7 @@ VLMChallengeCode/
 
 ---
 
-## 🚀 Next Command To Run
+## Next Command To Run
 
 ```bash
 cd "c:\Users\Chetak\Documents\GitHub\projects\VLM Challenge\VLMChallengeCode"

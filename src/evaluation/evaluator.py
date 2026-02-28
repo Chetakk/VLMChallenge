@@ -51,9 +51,7 @@ def compute_aa_at_1(gt_dict, pred_dict):
     return correct / total if total > 0 else 0
 
 
-# -----------------------------
-# Evaluate Single Model
-# -----------------------------
+
 
 def evaluate_model(gt_data, pred_data):
     gt_dict = {item["clip_id"]: item for item in gt_data}
@@ -65,10 +63,6 @@ def evaluate_model(gt_data, pred_data):
         "AA@1": compute_aa_at_1(gt_dict, pred_dict),
     }
 
-
-# -----------------------------
-# Main Evaluation Entry
-# -----------------------------
 
 def evaluate(
     gt_path,
@@ -92,9 +86,6 @@ def evaluate(
     print(json.dumps(results, indent=2))
 
 
-# -----------------------------
-# CLI Execution
-# -----------------------------
 
 if __name__ == "__main__":
     evaluate(

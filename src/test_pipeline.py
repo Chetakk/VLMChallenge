@@ -3,9 +3,6 @@ from src.data.clip_builder import build_clips
 from src.data.shard_writer import write_shards
 
 
-# ----------------------------
-# Step 1 — Create Fake Operations
-# ----------------------------
 
 base_time = datetime.now()
 
@@ -27,9 +24,6 @@ operations = [
     }
 ]
 
-# ----------------------------
-# Step 2 — Build Clips
-# ----------------------------
 
 clips = build_clips(
     operations=operations,
@@ -41,9 +35,6 @@ print("Generated clips:", len(clips))
 print("First clip:", clips[0])
 
 
-# ----------------------------
-# Step 3 — Attach Fake Image Paths
-# ----------------------------
 
 for clip in clips:
     clip["image_paths"] = [
@@ -52,10 +43,5 @@ for clip in clips:
     ]
 
 
-# ----------------------------
-# Step 4 — Write WebDataset Shards
-# ----------------------------
-
 write_shards(clips, shard_dir="data/shards_test", shard_size=2)
-
 print("Pipeline test complete.")

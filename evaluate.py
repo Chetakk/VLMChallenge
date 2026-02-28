@@ -1,9 +1,4 @@
-"""
-PHASE 4: Evaluation
 
-Evaluates model performance on temporal warehouse operation understanding.
-Computes required metrics: OCA, tIoU@0.5, AA@1
-"""
 
 import json
 import numpy as np
@@ -12,7 +7,7 @@ from typing import Dict, List, Tuple
 
 
 def calculate_intersection_over_union(pred_segment: Dict, gt_segment: Dict) -> float:
-    """Calculate Temporal Intersection over Union."""
+
     pred_start = pred_segment["start_frame"]
     pred_end = pred_segment["end_frame"]
     gt_start = gt_segment["start_frame"]
@@ -40,16 +35,7 @@ def evaluate_predictions(
     predictions: List[Dict],
     ground_truth: List[Dict],
 ) -> Dict:
-    """
-    Evaluate predictions against ground truth.
-    
-    Args:
-        predictions: List of predictions from model
-        ground_truth: List of ground truth annotations
-    
-    Returns:
-        Dictionary with OCA, tIoU@0.5, AA@1 metrics
-    """
+
     
     if len(predictions) != len(ground_truth):
         print(f"[WARN] Prediction count ({len(predictions)}) != GT count ({len(ground_truth)})")
@@ -98,7 +84,6 @@ def evaluate_predictions(
 
 
 def evaluate_phase4():
-    """Run Phase 4 evaluation."""
     
     print("\n" + "="*70)
     print("PHASE 4: Evaluation - Temporal Operation Understanding")
@@ -123,8 +108,6 @@ def evaluate_phase4():
     
     print(f"[DATASET] Test set size: {len(test_ground_truth)} clips\n")
     
-    # For now, use ground truth as baseline predictions
-    # In actual Phase 3, this would be predictions from fine-tuned model
     test_predictions = [
         {
             "clip_id": clip["clip_id"],

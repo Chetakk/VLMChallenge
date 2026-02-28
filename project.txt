@@ -1,0 +1,354 @@
+# VLM Challenge: Temporal Operation Intelligence for Logistics
+
+**Assignment Duration:** 36 hours
+
+**Submission Format:** Public GitHub repository with all deliverables
+
+**Difficulty Level:** Advanced — Production-grade ML Engineering under resource constraints
+
+---
+
+## Overview
+
+This assignment evaluates your ability to build, fine-tune, and deploy a **Vision-Language Model (VLM) for temporal video understanding** in manufacturing and logistics environments. This task requires your model to reason about:
+
+- **Sequential operations** across time
+- **Temporal boundaries** between actions
+- **Procedural logic** — predicting what happens next based on what happened before
+
+You will work with real warehouse packaging operations, limited to free-tier GPU compute, and must deliver a complete pipeline from data loading to API deployment with rigorous evaluation.
+
+**This is not a tutorial-following exercise.** You are expected to architect a solution using modern VLM frameworks, constraint-aware training strategies, and AI coding agents to accelerate development velocity.
+
+---
+
+## Assignment Objectives
+
+### The Core Problem
+
+In modern warehousing and logistics operations, understanding worker actions from video surveillance is critical for process optimization, training, and quality control. However, most computer vision systems operate on individual frames and cannot understand the *sequence* of operations or predict what comes next in a workflow.
+
+Your objective is to build an end-to-end system that can:
+
+**1. Understand Temporal Context in Video**
+
+Given a short video clip (5 seconds) of a warehouse worker performing packaging tasks, your system must identify which operation is being performed (e.g., “Tape”, “Pack”, “Label”) and determine the precise frame boundaries where that operation starts and ends within the clip.
+
+**2. Learn Procedural Grammar**
+
+Beyond recognizing the current operation, your system must learn the implicit *sequence rules* of packaging work. For example, “Tape” typically follows “Box Setup” and precedes “Put Items”. Your model should predict what operation is likely to happen next, even though it can only see the current clip.
+
+**3. Demonstrate Resource-Constrained Engineering**
+
+You must accomplish this using only free-tier cloud GPU resources (no paid compute required), implementing memory-efficient training techniques and demonstrating practical ML engineering skills that translate to production environments.
+
+**4. Build Production-Ready Infrastructure**
+
+Your solution must include a deployable API endpoint, reproducible training pipeline, and rigorous evaluation framework — not just a research notebook. This simulates real-world deployment requirements.
+
+### What Success Looks Like
+
+A successful submission will demonstrate measurable improvement from base model to fine-tuned model across three metrics:
+
+- **Operation Classification Accuracy (OCA):** Can your model correctly identify which operation is happening?
+- **Temporal IoU (tIoU@0.5):** Can your model pinpoint *when* the operation starts and ends within the video clip?
+- **Anticipation Accuracy (AA@1):** Can your model predict what operation comes *next*, proving it has learned the procedural workflow?
+
+The anticipation metric is the most critical — it separates models that merely recognize visual patterns from those that understand temporal sequences and work processes.
+
+---
+
+## Recommended Open-Source VLMs
+
+Select **one** model from this table based on your compute access and technical preferences:
+
+| Model | Parameters | Key Strengths | Training VRAM (4-bit QLoRA) | Recommendation |
+| --- | --- | --- | --- | --- |
+| **Qwen2.5-VL-2B** | 2B | Fast inference, proven video support, Unsloth-compatible, extensive documentation | ~5–7 GB | **Best for Kaggle/T4** — Most accessible option |
+| **LLaVA-NeXT-Video-7B** | 7B | Native multi-frame architecture, strong zero-shot video capabilities | ~10–14 GB | **Best for GCP A100** — Strongest baseline performance |
+| **VideoLLaMA2-7B** | 7B | State-of-the-art spatial-temporal modeling, research-grade architecture | ~12–15 GB | **Best for experienced researchers** — Cutting-edge but less documented |
+
+**Model Links:**
+- Qwen2.5-VL: https://huggingface.co/Qwen/Qwen2-VL-2B-Instruct
+- LLaVA-NeXT-Video: https://huggingface.co/llava-hf/LLaVA-NeXT-Video-7B-hf
+- VideoLLaMA2: https://huggingface.co/DAMO-NLP-SG/VideoLLaMA2-7B
+
+**Fine-tuning Framework:**
+- Use `2U1/Qwen2-VL-Finetune` (https://github.com/2U1/Qwen2-VL-Finetune) for Qwen models
+- Use Hugging Face `trl` library’s SFTTrainer for LLaVA-NeXT or VideoLLaMA2
+
+---
+
+## Dataset: OpenPack
+
+**OpenPack** is a large-scale, open-access dataset of real-world packaging operations recorded in logistics warehouses. It contains 53+ hours of multi-modal sensor data including RGB-D video, IMU signals, and keypoint annotations.
+
+**Dataset Details:**
+- **Link:** https://zenodo.org/records/11059235
+- **Paper:** https://arxiv.org/abs/2212.11152
+- **GitHub:** https://github.com/open-pack/openpack-dataset
+- **Operation Classes (10):** `Box Setup`, `Inner Packing`, `Tape`, `Put Items`, `Pack`, `Wrap`, `Label`, `Final Check`, `Idle`, `Unknown`
+- **Video Format:** Kinect frontal-view RGB-D at ~25 fps, 480×640 resolution
+- **Annotations:** Frame-level operation labels with precise start/end timestamps
+
+**What You Must Use:**
+- **Subjects U0101–U0106** → Training set
+- **Subject U0107** → Validation set
+- **Subject U0108** → Test set (held out for final evaluation)
+- **Video modality:** Kinect frontal RGB only (ignore depth, IMU, and other sensors)
+
+**Why OpenPack?**
+Unlike SROIE receipts or COCO images, OpenPack has no published VLM fine-tuning tutorials. The temporal boundaries between operations are subtle (e.g., when does “Tape” end and “Put Items” begin?), making this a genuine test of video understanding rather than frame-level classification.
+
+---
+
+## Free & Credit-Based Compute Options
+
+You are **required** to complete this assignment using only free-tier or trial credit compute. Below is your strategic compute stack:
+
+| Platform | Hardware | Quota/Credits | VRAM | Best Used For | Sign-Up Link |
+| --- | --- | --- | --- | --- | --- |
+| **Kaggle Notebooks** | 2× NVIDIA T4 | 30 GPU hours/week, persistent | 32 GB total | Baseline training, always available | https://www.kaggle.com |
+| **Google Cloud Platform** | A100 40GB, V100, T4 | $300 free trial (~100h A100) | 40–80 GB | **Highest value for serious training** | https://cloud.google.com/free |
+| **Lightning AI** | T4, A10G | 80 GPU hours/month (~$15 credits) | 16–24 GB | Overflow training, debugging | https://lightning.ai/pricing |
+| **Paperspace Gradient** | M4000, P5000 | Free tier: 6h sessions, unlimited idle | 8–16 GB | Prototyping, short experiments | https://www.paperspace.com/pricing |
+| **Azure for Students** | NCv3, NDv2 | $100 credits (students only) | 16–32 GB | Academic users | https://azure.microsoft.com/en-us/free/students |
+| **HuggingFace ZeroGPU** | A100 (time-sliced) | Rate-limited, free for public Spaces | 40 GB | **Final API demo hosting only** | https://huggingface.co/zero-gpu-explorers |
+
+**Recommended Compute Strategy:**
+1. **Phase 1–2 (Data Pipeline, Base Deploy):** Kaggle T4
+2. **Phase 3 (Main Fine-Tuning Run):** GCP $300 Trial → Vertex AI A100 (best VRAM-to-cost)
+3. **Phase 3 (Fallback if no GCP):** Kaggle 2×T4 with gradient checkpointing + batch size 2
+4. **Phase 4 (Evaluation):** Kaggle T4
+5. **Phase 1 (Serving Demo):** HuggingFace ZeroGPU Space
+
+---
+
+## Phase-by-Phase Execution Guide
+
+### **Phase 1: Frame-Aware VLM Deployment** (Target: 0–3 hours)
+
+**Objective:** Deploy your chosen base VLM as a FastAPI endpoint that accepts video uploads and returns JSON predictions (zero-shot, no fine-tuning yet).
+
+**Required JSON Output Schema:**
+
+```json
+{
+  "clip_id": "U0108_S0500_t0035",
+  "dominant_operation": "Tape",
+  "temporal_segment": { "start_frame": 14, "end_frame": 98 },
+  "anticipated_next_operation": "Put Items",
+  "confidence": 0.87
+}
+```
+
+**Hints for Budget Execution:**
+- Use `decord` library for efficient video decoding (supports GPU-accelerated frame extraction)
+- Test locally first with a 5-frame sample video before deploying to Docker
+- FastAPI endpoint template: `POST /predict` accepts multipart file upload, returns JSON
+- Base model will likely hallucinate `anticipated_next_operation` at this stage — that’s expected
+- Use AI agents (Cursor, Claude) to generate Docker boilerplate — log this in AGENTS.md
+
+**Deliverable:** `docker-compose.yml` + `Dockerfile`
+
+---
+
+### **Phase 2: Temporal Data Pipeline** (Target: 3–7 hours)
+
+**Objective:** Build a data pipeline that downloads OpenPack, extracts clips centered on operation boundaries, and generates VLM-compatible training pairs.
+
+**Critical Requirements:**
+1. Use `openpack-toolkit` Python library to load annotations and video paths
+2. Sample clips at ±0.5 seconds around operation boundaries (not just mid-operation)
+3. Implement a **justified frame sampling strategy** — uniform sampling is forbidden. Choose and defend one:
+- Motion-magnitude adaptive sampling (optical flow delta)
+- Entropy-based keyframe selection
+- Fixed-stride with temporal overlap for boundary clips
+4. Output training pairs: `{video_frames → system_prompt + target_JSON}`
+
+**Hints for Budget Execution:**
+- Pre-extract all frames to JPEG at 336×336 resolution (Qwen2.5-VL native size) using `ffmpeg` — never decode raw video during training
+- Shard your dataset into WebDataset `.tar` files (100–500 MB each) for streaming data loading
+- Save 20 sample training examples to `training_data_samples/` folder for reviewer verification
+- Boundary clips are where models fail — ensure you sample clips that start mid-operation and end mid-next-operation
+- Normalize all Kinect video to 25fps before frame extraction: `ffmpeg -i input.avi -vf "scale=336:336,fps=25" -c:v libx264 output.mp4`
+
+**Deliverable:** `data_pipeline.py` + `training_data_samples/` folder (20 examples committed to repo)
+
+---
+
+### **Phase 3: PEFT Fine-Tuning for Temporal Grounding** (Target: 7–16 hours)
+
+**Objective:** Fine-tune your VLM using LoRA/QLoRA on OpenPack training data to improve temporal understanding.
+
+**Hard Constraints:**
+- Training must run on **Kaggle 2×T4 (32GB)** or **GCP Vertex AI A100 (40GB)**
+- Must use 4-bit quantization (BitsAndBytes or Unsloth)
+- Must use gradient checkpointing
+- Kaggle Notebook must be saved and publicly shared with execution logs visible
+
+**Required `# VRAM MATH` Cell in Notebook:**
+
+```python
+# VRAM Budget Calculation (Required Format)
+model_base_4bit    = 2.0   # GB — Your model at 4-bit
+lora_adapters      = 0.3   # GB — LoRA rank + alpha
+frames_per_clip    = 8     # Sampled frames per 5-sec clip
+frame_tokens       = 256   # Visual tokens per frame (after vision encoder)
+batch_size         = 2
+token_hidden_dim   = 1536  # Your model's hidden size
+activation_gb      = (frames_per_clip * frame_tokens * batch_size * token_hidden_dim * 2) / 1e9
+# With gradient checkpointing: activation_gb * 0.4 (recomputed, not stored)
+total_vram_gb      = model_base_4bit + lora_adapters + (activation_gb * 0.4)
+print(f"Estimated VRAM:{total_vram_gb:.2f} GB")
+# Must be < 16 GB for T4 or < 40 GB for A100
+```
+
+**Hints for Budget Execution:**
+- `gradient_accumulation_steps=8` with `batch_size=2` simulates effective batch size of 16 without holding 16 clips in VRAM
+- Enable all three flags: `model.gradient_checkpointing_enable()`, `model.enable_input_require_grads()`, `gradient_checkpointing=True` in TrainingArguments
+- Save checkpoints every 50 steps: `save_steps=50, save_total_limit=3` — Kaggle sessions terminate after 12 hours, checkpoints allow recovery
+- Use `resume_from_checkpoint=True` if session disconnects
+- Frame count is the VRAM killer — 8 frames per clip is safe, 16 frames will likely OOM on T4
+- Use WebDataset streaming DataLoader to avoid loading entire dataset into RAM
+
+**Deliverable:** `finetune.ipynb` with live public Kaggle/GCP Notebook link embedded in cell 1, showing successful execution with GPU logs
+
+---
+
+### **Phase 4: Temporal Evaluation** (Target: 16–21 hours)
+
+**Objective:** Evaluate base model vs. fine-tuned model on 30 held-out clips from subject U0108 and generate `results.json`.
+
+**Three Required Metrics:**
+
+**1. Operation Classification Accuracy (OCA)** — Top-1 accuracy on `dominant_operation` prediction
+
+**2. Temporal IoU (tIoU@0.5)** — Fraction of clips where predicted temporal segment has IoU ≥ 0.5 with ground truth:
+
+```
+tIoU = |predicted ∩ ground_truth| / |predicted ∪ ground_truth|
+```
+
+**3. Anticipation Accuracy (AA@1)** — Top-1 accuracy on `anticipated_next_operation`
+
+This metric has no analogue in image VLM tutorials. Random chance = 1/9 ≈ 11%. A well-trained model should exceed 50%.
+
+**Required `results.json` Format:**
+
+```json
+{
+  "base_model": {
+    "OCA": 0.23,
+    "tIoU@0.5": 0.11,
+    "AA@1": 0.12
+  },
+  "finetuned_model": {
+    "OCA": 0.71,
+    "tIoU@0.5": 0.54,
+    "AA@1": 0.48
+  }
+}
+```
+
+**Hints for Budget Execution:**
+- Use Kaggle T4 for evaluation — inference is lightweight compared to training
+- Run evaluation on exactly 30 clips from U0108 test set (select first 30 alphabetically by clip ID for consistency)
+- Parse ground truth annotations from OpenPack toolkit’s JSON files
+- A model with zero AA@1 improvement has failed to learn temporal dynamics regardless of OCA score
+- Compute tIoU only for clips where model successfully predicts non-zero temporal segments
+
+**Deliverable:** `evaluate.py` + `results.json`
+
+---
+
+### **Phase 5: Required Documentation**
+
+### **ARCHITECTURE.md** (Three Required Sections)
+
+**1. Model Selection Defense**
+
+Why you chose your VLM over the other two options. Include a VRAM budget comparison table showing why your choice fits the available compute.
+
+**2. Frame Sampling Rationale**
+
+Explain why your chosen sampling strategy captures temporal boundaries better than uniform sampling. Include at least one diagram (ASCII art acceptable) or visualization showing sampling pattern relative to operation boundaries.
+
+**3. Failure Mode Analysis**
+
+Identify one operation class your model confuses most often (e.g., “Tape” misclassified as “Pack”) and hypothesize why based on visual similarity or temporal ambiguity.
+
+### **AGENTS.md** (AI Development Log)
+
+Log every AI agent interaction with:
+- Tool used (Cursor, Claude Code, GitHub Copilot, etc.)
+- Exact prompt or request
+- What code/output was accepted vs. modified
+- Estimated time saved (e.g., “Docker boilerplate — 20 minutes saved”)
+- Git commit hash of the resulting code
+
+**Git Commit Cadence Requirement:**
+
+You must commit at hours 4, 12, 20, and 24 with meaningful commit messages. This verifies your AGENTS.md log is authentic, not fabricated post-hoc.
+
+**Deliverable:** `ARCHITECTURE.md` + `AGENTS.md`
+
+---
+
+## Final Deliverables Checklist
+
+Submit a **public GitHub repository** containing:
+
+```
+repo/
+├── docker-compose.yml           # FastAPI deployment config
+├── Dockerfile                   # Container definition
+├── data_pipeline.py             # OpenPack data loader + frame sampling
+├── training_data_samples/       # 20 example training pairs (committed)
+├── finetune.ipynb              # Kaggle/GCP Notebook with live link in cell 1
+├── evaluate.py                  # Evaluation script for 3 metrics
+├── results.json                 # Base vs. fine-tuned model scores
+├── ARCHITECTURE.md              # 3 sections: Model choice, Frame sampling, Failure analysis
+└── AGENTS.md                    # AI agent development log with commit hashes
+```
+
+---
+
+## Grading Rubric (100 Points Total)
+
+| Criterion | Weight | What We Evaluate |
+| --- | --- | --- |
+| **Temporal Delta** | 40% | `results.json` improvement in **tIoU@0.5** AND **AA@1**. A model with zero AA@1 improvement fails temporal learning regardless of OCA. We prioritize anticipation accuracy — this metric proves the model learned procedural grammar. |
+| **Frame Sampling Intelligence** | 25% | `ARCHITECTURE.md` defense + `data_pipeline.py` implementation. Does your strategy target operation boundaries? Is your VRAM math self-consistent with actual notebook execution? Did you justify why your sampling beats uniform? |
+| **Reproducibility** | 20% | `docker-compose up` builds successfully. Kaggle Notebook link is live and shows green execution with GPU logs. `evaluate.py` runs to completion without errors. Training samples in repo match pipeline output. |
+| **Engineering Velocity** | 15% | `AGENTS.md` demonstrates effective AI agent usage. Git commits at hours 4, 12, 20, 24 verify authenticity. Evidence of boilerplate acceleration (Docker, FastAPI, DataLoader), not just conceptual discussion. |
+
+---
+
+## Best Practices for Budget Compute
+
+### 1. Never Load Raw Video During Training
+
+Pre-extract all frames to JPEG/PNG tiles before training begins. Use `decord` for GPU-accelerated frame extraction. This reduces I/O during training by 10-50x.
+
+### 2. Shard Your Dataset Into WebDataset Tarballs
+
+Do not use folder-of-JPEGs loaders at scale. Shard into `.tar` files of 100–500 MB each and stream them. This ensures your DataLoader never loads more than one shard into RAM at a time.
+
+### 3. Separate VRAM Budgets: Model vs. Activations vs. Frames
+
+Frame count is the most dangerous variable. Going from 8 frames to 16 frames per clip roughly doubles activation memory. Always calculate your VRAM budget explicitly before training.
+
+### 4. Gradient Checkpointing Is Non-Negotiable for Video
+
+Enable these three flags together: `model.gradient_checkpointing_enable()`, `model.enable_input_require_grads()`, and `gradient_checkpointing=True` in TrainingArguments. Use `gradient_accumulation_steps=8` with `batch_size=2` to simulate larger batches.
+
+### 5. Checkpoint Aggressively to Avoid Session Loss
+
+Save checkpoints every 50 steps, not every epoch. Use `save_strategy="steps"`, `save_steps=50`, `save_total_limit=3`, and `resume_from_checkpoint=True`.
+
+---
+
+## Questions?
+
+This is an unsupervised assignment. Part of the evaluation is your ability to navigate ambiguity, research solutions, and make engineering trade-offs under constraints. If you encounter blockers (e.g., OpenPack download issues), document your workaround in ARCHITECTURE.md.

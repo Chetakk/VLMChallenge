@@ -1,1 +1,1 @@
-"""VLM OpenPack - Vision Language Model Challenge"""
+# VLM Challenge Implementation

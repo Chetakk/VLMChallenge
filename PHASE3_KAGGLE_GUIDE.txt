@@ -7,19 +7,19 @@ This guide walks through fine-tuning Qwen2.5-VL on Kaggle T4 GPUs.
 PHASE_3_DEPLOYMENT = """
 # Phase 3: Fine-tuning Qwen2.5-VL on Kaggle
 
-## Pre-Kaggle Checklist ✅
+## Pre-Kaggle Checklist
 
 COMPLETED:
-  ✅ Phase 1: Base API deployed locally (test_phase1.py passes)
-  ✅ Phase 2: 100 synthetic videos generated + 20 training samples
-  ✅ Phase 5: ARCHITECTURE.md with model justification + failure analysis
-  ✅ Phase 5: AGENTS.md with AI agent timeline
+  [DONE] Phase 1: Base API deployed locally (test_phase1.py passes)
+  [DONE] Phase 2: 100 synthetic videos generated + 20 training samples
+  [DONE] Phase 5: ARCHITECTURE.md with model justification + failure analysis
+  [DONE] Phase 5: AGENTS.md with AI agent timeline
 
 READY FOR KAGGLE:
-  ✅ training_data_samples/ folder (20 videos + index.json)
-  ✅ src/training/ (dataset.py, vram_math.py, finetune_config.py)
-  ✅ notebooks/qwen_training.ipynb (ready to upload)
-  ✅ requirements.txt (transformers, peft, bitsandbytes)
+  [DONE] training_data_samples/ folder (20 videos + index.json)
+  [DONE] src/training/ (dataset.py, vram_math.py, finetune_config.py)
+  [DONE] notebooks/qwen_training.ipynb (ready to upload)
+  [DONE] requirements.txt (transformers, peft, bitsandbytes)
 
 ---
 
@@ -236,7 +236,7 @@ Generate `results.json` with final metrics.
 ## Time Management
 
 **36-hour deadline allocation:**
-- Phase 1-2: 4 hours ✅ DONE
+- Phase 1-2: 4 hours [DONE]
 - Phase 3 (Kaggle): 10 hours (8-10 training + 1 download + 1 local test)
 - Phase 4 (Evaluation): 2 hours
 - Phase 5 (Documentation): 2 hours
@@ -249,41 +249,41 @@ Generate `results.json` with final metrics.
 ## Final Deliverables (Phase 5)
 
 Ensure repository has:
-- ✅ README.md (project overview)
-- ✅ ARCHITECTURE.md (model justification + failure analysis)
-- ✅ AGENTS.md (AI agent timeline)
-- ✅ requirements.txt (all dependencies)
-- ✅ src/api/ (FastAPI server)
-- ✅ src/training/ (fine-tuning code)
-- ✅ src/evaluation/ (metrics computation)
-- ✅ src/data/ (data pipeline)
-- ✅ notebooks/qwen_training.ipynb (Kaggle notebook)
-- ✅ results.json (final metrics)
-- 📂 checkpoints/ (LoRA fine-tuned model)
-- 📂 data/synthetic/ (100 synthetic videos + annotations)
+- [DONE] README.md (project overview)
+- [DONE] ARCHITECTURE.md (model justification + failure analysis)
+- [DONE] AGENTS.md (AI agent timeline)
+- [DONE] requirements.txt (all dependencies)
+- [DONE] src/api/ (FastAPI server)
+- [DONE] src/training/ (fine-tuning code)
+- [DONE] src/evaluation/ (metrics computation)
+- [DONE] src/data/ (data pipeline)
+- [DONE] notebooks/qwen_training.ipynb (Kaggle notebook)
+- [DONE] results.json (final metrics)
+- [PROGRESS] checkpoints/ (LoRA fine-tuned model)
+- [PROGRESS] data/synthetic/ (100 synthetic videos + annotations)
 
 ---
 
 ## Success Criteria
 
 **Phase 3 Success = :**
-- ✅ Training completes without OOM error
-- ✅ Loss decreases monotonically over epochs
-- ✅ Checkpoint saved properly
-- ✅ Fine-tuned model loads locally without error
-- ✅ Inference API returns valid JSON predictions
+- [DONE] Training completes without OOM error
+- [DONE] Loss decreases monotonically over epochs
+- [DONE] Checkpoint saved properly
+- [DONE] Fine-tuned model loads locally without error
+- [DONE] Inference API returns valid JSON predictions
 
 **Overall Success = :**
-- ✅ All 5 phases executed sequentially
-- ✅ OCA + tIoU@0.5 + AA@1 computed and saved to results.json
-- ✅ ARCHITECTURE.md + AGENTS.md complete
-- ✅ Code pushed to GitHub
-- ✅ README explains workarounds and decisions
-- ✅ All dependencies pinned in requirements.txt
+- [DONE] All 5 phases executed sequentially
+- [DONE] OCA + tIoU@0.5 + AA@1 computed and saved to results.json
+- [DONE] ARCHITECTURE.md + AGENTS.md complete
+- [DONE] Code pushed to GitHub
+- [DONE] README explains workarounds and decisions
+- [DONE] All dependencies pinned in requirements.txt
 
 ---
 
-Good luck! Start Kaggle training now. 🚀
+Good luck! Start Kaggle training now.
 """
 
 if __name__ == "__main__":

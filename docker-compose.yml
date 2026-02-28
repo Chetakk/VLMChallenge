@@ -5,14 +5,18 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    image: vlm-challenge:latest
+    container_name: vlm-api
     ports:
       - "8000:8000"
     volumes:
       - ./data:/app/data
-      - ./models:/app/models
+      - ./checkpoints:/app/checkpoints
+      - ./training_data_samples:/app/training_data_samples
     environment:
       - CUDA_VISIBLE_DEVICES=0
       - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
     deploy:
       resources:
         reservations:
@@ -20,21 +24,12 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [gpu]
-
-  # Optional: Add services for data processing, training, etc.
-  # training:
-  #   build: .
-  #   volumes:
-  #     - ./data:/app/data
-  #     - ./models:/app/models
-  #   command: python -m src.training.train
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             count: all
-  #             capabilities: [gpu]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   data:

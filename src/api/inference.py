@@ -1,8 +1,4 @@
-"""
-PHASE 1: Base VLM Inference Module
-
-Zero-shot and fine-tuned Qwen2.5-VL inference for temporal warehouse operations.
-"""
+# VLM inference engine for Qwen2.5-VL
 
 import torch
 import numpy as np
@@ -12,14 +8,11 @@ from PIL import Image
 
 
 class Qwen25VLInference:
-    """Qwen2.5-VL inference engine."""
-
     def __init__(self, 
                  model_name: str = "Qwen/Qwen2.5-VL-2B-Instruct", 
                  device: str = "auto", 
                  use_lora: bool = False,
                  lora_path: Optional[str] = None):
-        """Initialize Qwen2.5-VL inference engine."""
         self.model_name = model_name
         self.device = device
         self.use_lora = use_lora
@@ -29,7 +22,6 @@ class Qwen25VLInference:
         self._is_loaded = False
 
     def load_model(self):
-        """Load Qwen2.5-VL model from disk or HuggingFace."""
         try:
             from transformers import AutoProcessor, Qwen2_5VLForConditionalGeneration
             from peft import PeftModel
@@ -38,37 +30,27 @@ class Qwen25VLInference:
                 "Please install: pip install transformers peft pillow"
             )
         
-        print(f"📦 Loading model from: {self.model_path}")
+        print(f"Loading model from: {self.model_name}")
         
         # Load base model
         self.model = Qwen2_5VLForConditionalGeneration.from_pretrained(
-            self.model_path,
+            self.model_name,
             torch_dtype=torch.float16,
             device_map="auto",
         ).eval()
         
         # Load LoRA adapter if specified
         if self.use_lora:
-            print(f"🔧 Loading LoRA adapter...")
-            self.model = PeftModel.from_pretrained(self.model, self.model_path)
+            print(f"Loading LoRA adapter...")
+            self.model = PeftModel.from_pretrained(self.model, self.lora_path)
         
         # Load processor
-        self.processor = AutoProcessor.from_pretrained(self.model_path)
+        self.processor = AutoProcessor.from_pretrained(self.model_name)
         
-        print("✅ Model loaded successfully")
+        print("Model loaded successfully")
         return self.model
 
     def predict(self, video_frames: torch.Tensor, prompt: str = None) -> Dict:
-        """
-        Run inference on video frames.
-        
-        Args:
-            video_frames: Tensor of shape [num_frames, 3, H, W]
-            prompt: Optional custom prompt (default: temporal operation task)
-        
-        Returns:
-            dict with predictions
-        """
         if self.model is None:
             self.load_model()
         
@@ -109,13 +91,6 @@ class Qwen25VLInference:
         return result
 
     def _parse_prediction(self, text: str) -> Dict:
-        """
-        Parse model output to extract structured predictions.
-        
-        Returns:
-            dict with dominant_operation, temporal_segment, anticipated_next_operation
-        """
-        # Placeholder parsing - in production, use regex or structured output
         lines = text.lower().split('\n')
         
         # Extract operations (try to find in model output)
@@ -149,16 +124,6 @@ class Qwen25VLInference:
 
     def batch_predict(self, batch_frames: List[torch.Tensor], 
                      prompts: Optional[List[str]] = None) -> List[Dict]:
-        """
-        Run batch inference on multiple videos.
-        
-        Args:
-            batch_frames: List of frame tensors
-            prompts: Optional list of prompts
-        
-        Returns:
-            List of prediction dicts
-        """
         results = []
         for i, frames in enumerate(batch_frames):
             prompt = prompts[i] if prompts else None
@@ -168,18 +133,12 @@ class Qwen25VLInference:
 
 
 class BaselineModel:
-    """
-    PHASE 1 Baseline: Rule-based predictions (no ML).
-    Used to establish zero-shot performance floor.
-    """
-    
     OPERATION_SEQUENCE = [
         "Box Setup", "Inner Packing", "Tape", "Put Items",
         "Pack", "Wrap", "Label", "Final Check",
     ]
     
     def predict(self, clip_id: str = "", num_frames: int = 125) -> Dict:
-        """Baseline rule-based prediction."""
         frame_per_op = num_frames // len(self.OPERATION_SEQUENCE)
         mid_idx = len(self.OPERATION_SEQUENCE) //2
         

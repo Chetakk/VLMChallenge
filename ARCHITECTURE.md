@@ -47,10 +47,10 @@
 | Criterion          | Qwen2.5-VL-2B | GPT-4V     | Llava-1.6-34B  | LLaVA-1.6-7B |
 | ------------------ | ------------- | ---------- | -------------- | ------------ |
 | Parameters         | 2.4B          | ~100B      | 34B            | 7B           |
-| T4 Fit (16GB)      | ✅ QLoRA      | ❌         | ❌             | ✅ LoRA      |
+| T4 Fit (16GB)      | [YES] QLoRA      | [NO]         | [NO]             | [YES] LoRA      |
 | Temporal Reasoning | ⭐⭐⭐⭐      | ⭐⭐⭐⭐⭐ | ⭐⭐⭐         | ⭐⭐⭐       |
 | Cost               | $0            | $$$$       | Free but large | Free         |
-| JSON Output        | ✅ Native     | ✅         | ⭐⭐⭐         | ⭐⭐         |
+| JSON Output        | [YES] Native     | [YES]         | [EXCELLENT]         | [GOOD]         |
 | Speed (Inference)  | 0.5s/clip     | 5s/clip    | 3s/clip        | 1.5s/clip    |
 
 **Justification:** Qwen2.5-VL offers best balance of temporal understanding (critical for AA@1), parameter efficiency (Kaggle constraint), and inference speed.
@@ -89,10 +89,10 @@ frames_indices = np.linspace(0, total_frames-1, num_frames=8, dtype=int)
 
 | Strategy                  | Pros                | Cons                        | Used        |
 | ------------------------- | ------------------- | --------------------------- | ----------- |
-| **Uniform**               | Fast, deterministic | May miss key moments        | ✅ Phase 1  |
+| **Uniform**               | Fast, deterministic | May miss key moments        | [YES] Phase 1  |
 | **Motion-Adaptive**       | Captures key frames | Slower, non-deterministic   | Future      |
-| **Entropy-Based Ranking** | Balances both       | Moderate complexity         | ✅ Phase 2+ |
-| **Every 1st Frame**       | Captures all        | VRAM explosion (125 frames) | ❌          |
+| **Entropy-Based Ranking** | Balances both       | Moderate complexity         | [YES] Phase 2+ |
+| **Every 1st Frame**       | Captures all        | VRAM explosion (125 frames) | [NO]          |
 
 ### Practical Impact on Metrics
 
@@ -254,9 +254,9 @@ API Deployment
 
 **Mitigation:**
 
-- ✅ Implemented: Frame index embedding (input: "frames 14-98 of 125")
-- ✅ Future: Temporal supervision head (auxiliary loss for frame boundaries)
-- ✅ Future: Interpolation-based frame augmentation (synthetic intermediate frames)
+- [YES] Implemented: Frame index embedding (input: "frames 14-98 of 125")
+- [YES] Future: Temporal supervision head (auxiliary loss for frame boundaries)
+- [YES] Future: Interpolation-based frame augmentation (synthetic intermediate frames)
 
 #### 2. **Next-Operation Prediction Failure (AA@1 bottleneck - 40% weight)**
 
@@ -270,8 +270,8 @@ API Deployment
 
 **Mitigation:**
 
-- ⚠️ **Current:** Synthetic data only follows 4-op sequence
-- ✅ Future: Randomized operation sequences in synthetic data
+- [WARN] **Current:** Synthetic data only follows 4-op sequence
+- [YES] Future: Randomized operation sequences in synthetic data
 - ✅ Future: Multi-task learning (predict next 1-3 operations, not just immediate)
 - ✅ Future: Hard negative mining (show operations that DON'T follow)
 

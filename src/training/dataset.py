@@ -1,8 +1,4 @@
-"""
-Dataset Module
-
-PyTorch dataset implementation for VLM training with WebDataset support.
-"""
+# PyTorch dataset for VLM training
 
 import json
 import torch
@@ -14,17 +10,8 @@ import io
 
 
 class VLMDataset(Dataset):
-    """Vision Language Model Dataset for temporal operation understanding."""
 
     def __init__(self, annotations_file, frames_dir=None, config=None):
-        """
-        Initialize dataset.
-        
-        Args:
-            annotations_file: Path to annotations.json
-            frames_dir: Path to extracted frames directory
-            config: Training config (batch_size, num_workers, etc.)
-        """
         self.annotations_file = Path(annotations_file)
         self.frames_dir = Path(frames_dir) if frames_dir else None
         self.config = config or {}
@@ -33,26 +20,12 @@ class VLMDataset(Dataset):
         with open(self.annotations_file) as f:
             self.samples = json.load(f)
         
-        print(f"✅ Loaded {len(self.samples)} samples from {self.annotations_file.name}")
+        print(f\"[OK] Loaded {len(self.samples)} samples from {self.annotations_file.name}\")
 
     def __len__(self):
-        """Return dataset length."""
         return len(self.samples)
 
     def __getitem__(self, idx):
-        """
-        Get item by index.
-        
-        Returns:
-            {
-                'clip_id': str,
-                'frames_tensor': Tensor[num_frames, 3, 336, 336],
-                'dominant_operation': str,
-                'temporal_segment': dict,
-                'anticipated_next_operation': str,
-                'labels': dict (for training)
-            }
-        """
         sample = self.samples[idx]
         clip_id = sample["clip_id"]
         
@@ -76,14 +49,13 @@ class VLMDataset(Dataset):
         }
 
     def _load_frames(self, sample, idx):
-        """Load frame tensor from video or synthetic data."""
         try:
             # Try loading from video path
             video_path = Path(sample.get("video_path", ""))
             if video_path.exists():
                 return self._load_video_frames(video_path)
         except Exception as e:
-            print(f"⚠️  Error loading video {sample.get('video_path')}: {e}")
+            print(f\"[WARN] Error loading video {sample.get('video_path')}: {e}\")
         
         # Fallback: create dummy tensor (for testing)
         return torch.randn(8, 3, 336, 336, dtype=torch.float32)
@@ -127,22 +99,9 @@ class VLMDataset(Dataset):
 
 
 class WebDatasetLoader:
-    """Load data from WebDataset tar shards."""
     
     @staticmethod
     def create_loader(shard_dir, batch_size=4, num_workers=2, shuffle=True):
-        """
-        Create a WebDataset-based data loader.
-        
-        Args:
-            shard_dir: Directory containing tar shards
-            batch_size: Batch size
-            num_workers: Number of workers
-            shuffle: Whether to shuffle
-        
-        Returns:
-            DataLoader
-        """
         dataset = wds.WebDataset(f"{shard_dir}/shard_*.tar")
         
         dataset = dataset.decode("pil").to_dict()
@@ -158,19 +117,6 @@ class WebDatasetLoader:
 
 def create_vlm_dataloader(annotations_file, frames_dir=None, batch_size=4, 
                           num_workers=0, shuffle=True):
-    """
-    Create DataLoader for VLM training.
-    
-    Args:
-        annotations_file: Path to annotations.json
-        frames_dir: Path to frames directory
-        batch_size: Batch size
-        num_workers: Number of worker processes
-        shuffle: Whether to shuffle data
-    
-    Returns:
-        DataLoader
-    """
     dataset = VLMDataset(
         annotations_file=annotations_file,
         frames_dir=frames_dir,
