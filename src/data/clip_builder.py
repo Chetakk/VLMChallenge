@@ -46,7 +46,7 @@ def build_clips(operations: List[Dict], subject_id: str, session_id: str) -> Lis
         clip = {
             "clip_id": f"{subject_id}_{session_id}_{i:04d}",
             "dominant_operation": current_op["operation"],
-            "tempopral_segment" : {
+            "temporal_segment" : {
                 "start_frame": current_op["start_frame"],
                 "end_frame": current_op["end_frame"],
             },

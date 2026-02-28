@@ -7,17 +7,33 @@ RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
     git \
+    ffmpeg \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir \
+    uvicorn[standard] \
+    peft \
+    bitsandbytes \
+    transformers
 
 # Copy application code
 COPY src/ ./src/
 COPY notebooks/ ./notebooks/
+COPY data/ ./data/
+
+# Expose port
+EXPOSE 8000
+
+# Run API server
+CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
 # Expose API port
 EXPOSE 8000
